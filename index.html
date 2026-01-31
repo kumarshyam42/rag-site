@@ -551,8 +551,10 @@
   @media (max-width: 900px) {
     body {
       grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
+      height: 100%;
     }
+    html { height: 100%; }
     .sidebar { display: none; }
     .arch-grid { grid-template-columns: 1fr; }
 
@@ -565,7 +567,7 @@
 
     .main {
       padding: 16px;
-      padding-bottom: 16px;
+      padding-bottom: 72px;
     }
 
     .content-card {
@@ -597,10 +599,14 @@
 
     pre { font-size: 11px !important; padding: 10px 12px !important; }
 
-    /* Show mobile tab bar */
+    /* Show mobile tab bar — fixed to bottom of screen */
     .mobile-tab-bar {
       display: flex;
-      grid-column: 1 / -1;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 80;
       background: var(--navy);
       border-top: 1px solid rgba(39, 189, 190, 0.2);
       padding: 6px 8px calc(6px + var(--safe-bottom));
@@ -636,15 +642,6 @@
     }
     .tab-item.active .tab-icon { color: var(--teal); }
     .tab-item.active .tab-label { color: var(--teal); }
-    .tab-item .tab-dot {
-      display: none;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--teal);
-      position: absolute;
-      bottom: 2px;
-    }
   }
 
   @media (max-width: 480px) {
