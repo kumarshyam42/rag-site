@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#26314C">
-<title>Project 3: qmd Brief — Explorer</title>
+<title>Project 3: Obsidian RAG System — Explorer</title>
 <style>
   :root {
     --navy: #26314C;
@@ -657,10 +657,10 @@
 <body>
 
 <header>
-  <h1><span>PROJECT 3</span> &nbsp;·&nbsp; qmd Implementation Brief v3.5</h1>
+  <h1><span>PROJECT 3</span> &nbsp;·&nbsp; Obsidian RAG System v5.0</h1>
   <div class="header-meta">
-    <span>Jan 31, 2026</span>
-    <span class="status-badge blocker">Architecture Decision Needed</span>
+    <span>Feb 24, 2026</span>
+    <span class="status-badge done">Complete — v1.0 Shipped</span>
   </div>
 </header>
 
@@ -689,7 +689,7 @@
   </div>
   <div class="tab-item" onclick="mobileTab('qmd')" data-tab="qmd">
     <span class="tab-icon">⌕</span>
-    <span class="tab-label">qmd</span>
+    <span class="tab-label">Search</span>
   </div>
   <div class="tab-item" onclick="mobileTab('decisions')" data-tab="decisions">
     <span class="tab-icon">⚡</span>
@@ -734,16 +734,16 @@ const state = {
 
 // ─── Data ───
 const SECTIONS = [
-  { id: 'overview', label: 'Project Overview', icon: '◆', tag: 'blocker', tagLabel: 'Blocked' },
+  { id: 'overview', label: 'Project Overview', icon: '◆', tag: 'done', tagLabel: 'Complete' },
   { id: 'workflow', label: 'Research Workflow', icon: '→', tag: 'done', tagLabel: 'Designed' },
-  { id: 'vault', label: 'Vault & Content', icon: '▤', tag: 'done', tagLabel: '270 Books' },
+  { id: 'vault', label: 'Vault & Content', icon: '▤', tag: 'done', tagLabel: '257 Books' },
   { id: 'splitting', label: 'Splitting Strategy', icon: '✂', tag: 'done', tagLabel: 'Tested' },
   { id: 'metadata', label: 'Metadata & Registry', icon: '⬡', tag: 'done', tagLabel: 'Finalized' },
-  { id: 'scripts', label: 'Scripts & Tools', icon: '⚙', tag: 'done', tagLabel: '6 Built' },
-  { id: 'qmd', label: 'qmd Search Engine', icon: '⌕', tag: 'blocker', tagLabel: 'Limitations' },
-  { id: 'sessions', label: 'Session History', icon: '◷', tag: 'pending', tagLabel: '3 Sessions' },
-  { id: 'decisions', label: 'Architecture Decision', icon: '⚡', tag: 'blocker', tagLabel: 'Blocking' },
-  { id: 'next', label: 'What\u2019s Next', icon: '▶', tag: 'blocked', tagLabel: 'Waiting' },
+  { id: 'scripts', label: 'Scripts & Tools', icon: '⚙', tag: 'done', tagLabel: '7 Built' },
+  { id: 'qmd', label: 'Qdrant Search Engine', icon: '⌕', tag: 'done', tagLabel: 'Indexed' },
+  { id: 'sessions', label: 'Session History', icon: '◷', tag: 'done', tagLabel: '5 Sessions' },
+  { id: 'decisions', label: 'Architecture Decision', icon: '⚡', tag: 'done', tagLabel: 'Decided' },
+  { id: 'next', label: 'What\u2019s Next', icon: '▶', tag: 'pending', tagLabel: 'Project 5' },
 ];
 
 const PRESETS = [
@@ -756,7 +756,7 @@ const PRESETS = [
 const ARCH_OPTIONS = [
   { id: 'A', name: 'qmd Only', short: 'Workarounds for YAML/filtering', pros: 'No new tools', cons: 'No filtering, two file copies' },
   { id: 'B', name: 'qmd + ChromaDB', short: 'Two-tool setup: browse + research', pros: 'Full metadata filtering', cons: 'Two systems to maintain' },
-  { id: 'C', name: 'ChromaDB Only', short: 'Replace qmd entirely', pros: 'Simplest long-term', cons: 'Lose hybrid search quality' },
+  { id: 'C', name: 'Qdrant + Voyage AI', short: 'Replace qmd with Qdrant vector DB', pros: 'Full filtering, Docker-based, scalable', cons: 'Requires Docker, API key for embeddings', selected: true },
   { id: 'D', name: 'SQLite + Vectors', short: 'Custom lightweight build', pros: 'Single file, full control', cons: 'More custom code to build' },
 ];
 
@@ -942,16 +942,16 @@ function renderSection(id) {
 function renderOverview() {
   return `
     <div class="content-card">
-      <h2><span class="section-icon">◆</span> Project 3: qmd Implementation Brief</h2>
-      <p class="subtitle">Build a local semantic search system for an Obsidian vault of book highlights, enabling natural language queries to support essay research for Substack.</p>
+      <h2><span class="section-icon">◆</span> Project 3: Obsidian RAG System</h2>
+      <p class="subtitle">A local semantic search system for an Obsidian vault of book highlights, powered by Qdrant + Voyage AI. Enables natural language queries with metadata filtering to support essay research for Substack.</p>
 
       <div class="stat-row">
-        <div class="stat-card"><div class="value">270</div><div class="desc">Book Files</div></div>
-        <div class="stat-card"><div class="value">2.09M</div><div class="desc">Total Words</div></div>
-        <div class="stat-card"><div class="value">23,411</div><div class="desc">Highlights</div></div>
-        <div class="stat-card"><div class="value gold">79</div><div class="desc">Favorites</div></div>
-        <div class="stat-card"><div class="value">267</div><div class="desc">Books in Registry</div></div>
-        <div class="stat-card"><div class="value red">1</div><div class="desc">Blocker</div></div>
+        <div class="stat-card"><div class="value">21,925</div><div class="desc">Vectors Indexed</div></div>
+        <div class="stat-card"><div class="value">257</div><div class="desc">Books Indexed</div></div>
+        <div class="stat-card"><div class="value">16,448</div><div class="desc">Nonfiction</div></div>
+        <div class="stat-card"><div class="value">5,228</div><div class="desc">Fiction</div></div>
+        <div class="stat-card"><div class="value gold">10,142</div><div class="desc">Favorites</div></div>
+        <div class="stat-card"><div class="value" style="color:var(--green)">18/18</div><div class="desc">Tests Passed</div></div>
       </div>
 
       <h3>Pipeline Status</h3>
@@ -962,26 +962,26 @@ function renderOverview() {
         <span class="flow-arrow">→</span>
         <div class="flow-step"><div class="flow-node done">📋</div><div class="flow-label">Registry Built</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node done">✂️</div><div class="flow-label">Split (5 test)</div></div>
+        <div class="flow-step"><div class="flow-node done">✂️</div><div class="flow-label">Split & Parse</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node done">⚡</div><div class="flow-label">qmd Tested</div></div>
+        <div class="flow-step"><div class="flow-node done">⚡</div><div class="flow-label">Qdrant Setup</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node current">🏗️</div><div class="flow-label">Architecture Decision</div></div>
+        <div class="flow-step"><div class="flow-node done">🏗️</div><div class="flow-label">Voyage AI Embeddings</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node blocked">✂️</div><div class="flow-label">Full Split</div></div>
+        <div class="flow-step"><div class="flow-node done">📇</div><div class="flow-label">Full Index</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node future">📇</div><div class="flow-label">Full Index</div></div>
+        <div class="flow-step"><div class="flow-node done">✅</div><div class="flow-label">18/18 Tests</div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node future">✍️</div><div class="flow-label">Essay Workflow</div></div>
+        <div class="flow-step"><div class="flow-node done">🚀</div><div class="flow-label">v1.0 Shipped</div></div>
       </div>
 
       <h3>Project Context</h3>
-      <p>Part of an 8-week research-to-publication system (Jan\u2013Feb 2026):</p>
+      <p>Part of the research-to-publication system (Jan\u2013Feb 2026):</p>
       <ul>
         <li>Project 1 ✅ \u2014 Claude Desktop mastery</li>
-        <li>Project 2 ✅ \u2014 Roam → Obsidian migration (199 notes)</li>
-        <li><strong>Project 3</strong> \u2014 qmd RAG system ← <em>Current, blocked</em></li>
-        <li>Project 5 \u2014 Substack essays (depends on Project 3)</li>
+        <li>Project 2 🟡 \u2014 Roam → Obsidian migration (85% \u2014 Phase 3 org remaining)</li>
+        <li>Project 3 ✅ \u2014 <strong>Obsidian RAG System</strong> \u2014 Complete, v1.0 tagged</li>
+        <li>Project 5 ⬜ \u2014 Substack essays (ready to begin)</li>
       </ul>
     </div>`;
 }
@@ -995,13 +995,15 @@ function renderWorkflow() {
       <div class="flow-diagram" style="flex-wrap: wrap; justify-content: center;">
         <div class="flow-step"><div class="flow-node done">📖</div><div class="flow-label">1. Sources<br><small style="color:var(--gray-400)">Readwise → Obsidian</small></div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node done">✂️</div><div class="flow-label">2. Split & Tag<br><small style="color:var(--gray-400)">~800-word chunks + YAML</small></div></div>
+        <div class="flow-step"><div class="flow-node done">🔍</div><div class="flow-label">2. Parse<br><small style="color:var(--gray-400)">Extract highlights</small></div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node current">🔍</div><div class="flow-label">3. Search<br><small style="color:var(--gray-400)">Natural language queries</small></div></div>
+        <div class="flow-step"><div class="flow-node done">📇</div><div class="flow-label">3. Index<br><small style="color:var(--gray-400)">Qdrant + Voyage AI</small></div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node future">🤖</div><div class="flow-label">4. Claude<br><small style="color:var(--gray-400)">Synthesize patterns</small></div></div>
+        <div class="flow-step"><div class="flow-node done">🔍</div><div class="flow-label">4. Search<br><small style="color:var(--gray-400)">Semantic + filters</small></div></div>
         <span class="flow-arrow">→</span>
-        <div class="flow-step"><div class="flow-node future">✍️</div><div class="flow-label">5. Substack<br><small style="color:var(--gray-400)">Shyam writes</small></div></div>
+        <div class="flow-step"><div class="flow-node current">🤖</div><div class="flow-label">5. Claude<br><small style="color:var(--gray-400)">Synthesize patterns</small></div></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><div class="flow-node future">✍️</div><div class="flow-label">6. Substack<br><small style="color:var(--gray-400)">Shyam writes</small></div></div>
       </div>
 
       <h3>V1 Scope</h3>
@@ -1023,10 +1025,10 @@ function renderVault() {
       <p class="subtitle">Current state of the Obsidian vault and Readwise highlights.</p>
 
       <div class="stat-row">
-        <div class="stat-card"><div class="value">572</div><div class="desc">Total Files</div></div>
-        <div class="stat-card"><div class="value">373</div><div class="desc">Readwise Files</div></div>
+        <div class="stat-card"><div class="value">383</div><div class="desc">Readwise Files</div></div>
+        <div class="stat-card"><div class="value">257</div><div class="desc">Books</div></div>
+        <div class="stat-card"><div class="value">38</div><div class="desc">Articles</div></div>
         <div class="stat-card"><div class="value">199</div><div class="desc">Roam Import</div></div>
-        <div class="stat-card"><div class="value red">154</div><div class="desc">Need Splitting</div></div>
       </div>
 
       <h3>Size Distribution</h3>
@@ -1044,19 +1046,17 @@ function renderVault() {
         <li><strong>38 files</strong> with nested bullets, <strong>6</strong> with \u201cLast, First\u201d author format</li>
       </ul>
 
-      <h3>Folder Structure (Target)</h3>
-      <pre>MyVault/
-├── Books/                    ← qmd indexes this
-│   ├── {Book Name}/          ← split books
-│   │   ├── _Index.md
-│   │   └── {Book} - N.md
-│   └── {Small Book}.md      ← books &lt;2000 words
-├── Readwise-Highlights/      ← source (Readwise syncs)
-├── Readwise-Original/        ← archive of pre-split
-├── Roam-Import/              ← NOT indexed in v1
-└── _System/
-    ├── Book-Metadata-Registry.yaml
-    └── needs-attention.md</pre>
+      <h3>Folder Structure</h3>
+      <pre>~/Documents/Docs/Research-System/
+├── Obsidian/
+│   └── MyVault/
+│       ├── Readwise-Highlights/  ← 257 books + 38 articles (383 files)
+│       ├── Books/                ← qmd-era copies (to delete)
+│       └── _System/             ← briefs, registries, project notes
+├── Scripts/                      ← 7 RAG + 9 legacy scripts
+├── RAG-Database/                 ← docker-compose.yml + qdrant_storage/
+├── Backups/                      ← 260224-rag-v1-scripts.tar.gz
+└── Essays/                       ← for Project 5</pre>
     </div>`;
 }
 
@@ -1156,102 +1156,117 @@ function renderScripts() {
   return `
     <div class="content-card">
       <h2><span class="section-icon">⚙</span> Scripts & Tools</h2>
-      <p class="subtitle">All 6 Python scripts in <code>~/Documents/Docs/Research-System/Scripts/</code></p>
+      <p class="subtitle">7 RAG scripts + 9 legacy in <code>~/Documents/Docs/Research-System/Scripts/</code></p>
 
+      <h3>RAG Scripts (v1.0)</h3>
       <table class="data-table">
         <tr><th>Script</th><th>Purpose</th><th>Status</th></tr>
         <tr>
-          <td><code>audit_vault.py</code></td>
-          <td>Analyze vault, identify large files, report stats</td>
-          <td><span class="tag tag-done" style="font-size:11px">✅ Run</span></td>
+          <td><code>config.py</code></td>
+          <td>Shared settings (paths, Qdrant host, collection name)</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
         </tr>
         <tr>
-          <td><code>populate_book_registry.py</code></td>
-          <td>Auto-populate Registry via Open Library API</td>
-          <td><span class="tag tag-done" style="font-size:11px">✅ Refactored</span></td>
+          <td><code>embeddings.py</code></td>
+          <td>Voyage AI wrapper (voyage-4-large model)</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
         </tr>
         <tr>
-          <td><code>split_readwise.py</code></td>
-          <td>Split large files, apply YAML from Registry</td>
-          <td><span class="tag tag-done" style="font-size:11px">✅ Tested</span></td>
+          <td><code>qdrant_setup.py</code></td>
+          <td>Qdrant collection management</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
         </tr>
         <tr>
-          <td><code>check_for_updates.py</code></td>
-          <td>Detect new books since last run</td>
-          <td><span class="tag tag-done" style="font-size:11px">✅ Built</span></td>
+          <td><code>parse_highlights.py</code></td>
+          <td>Readwise markdown parser (extracts highlights + metadata)</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
         </tr>
         <tr>
-          <td><code>process_updates.py</code></td>
-          <td>One-command wrapper for ongoing workflow</td>
-          <td><span class="tag tag-done" style="font-size:11px">✅ Built</span></td>
+          <td><code>index_to_qdrant.py</code></td>
+          <td>Full indexing pipeline (embed + upsert)</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
+        </tr>
+        <tr>
+          <td><code>search_qdrant.py</code></td>
+          <td>Search interface with metadata filters</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
+        </tr>
+        <tr>
+          <td><code>update_index.py</code></td>
+          <td>Incremental updates (new/changed files)</td>
+          <td><span class="tag tag-done" style="font-size:11px">✅ Done</span></td>
         </tr>
       </table>
 
-      <h3>qmd Commands Reference</h3>
-      <pre># Installation
-bun install -g https://github.com/tobi/qmd
+      <h3>Infrastructure</h3>
+      <pre># Qdrant (Docker)
+docker compose up -d        # Start Qdrant on port 6333
+# Location: ~/Documents/Docs/Research-System/RAG-Database/
 
-# Collection setup
-qmd collection add &lt;path&gt; --name &lt;name&gt;
-qmd context add qmd://&lt;name&gt; "Description"
+# Python Environment
+source .venv/bin/activate    # qdrant-client 1.16.1, voyageai 0.3.7
 
-# Indexing
-qmd embed              # Generate embeddings
-qmd embed -f           # Force re-embed
-
-# Search modes
-qmd search "keywords"  # BM25 only (fastest)
-qmd vsearch "concept"  # Vector only (semantic)
-qmd query "question"   # Hybrid + rerank (best)</pre>
+# Search examples
+python search_qdrant.py "leadership frameworks"
+python search_qdrant.py "economics" --genre nonfiction --favorites-only
+python search_qdrant.py "war" --author "Tolstoy"</pre>
 
       <h3>Dependencies</h3>
-      <p>Python: <code>requests</code>, <code>pyyaml</code> (system pip, no virtualenv)</p>
-      <p>qmd: installed at <code>~/.bun/bin/qmd</code> (not on PATH)</p>
+      <p>Python venv: <code>qdrant-client 1.16.1</code>, <code>voyageai 0.3.7</code>, <code>requests</code>, <code>pyyaml</code></p>
+      <p>Docker: Qdrant 1.17.0 on port 6333</p>
+      <p>Embedding model: Voyage AI <code>voyage-4-large</code></p>
     </div>`;
 }
 
 function renderQmd() {
   return `
     <div class="content-card">
-      <h2><span class="section-icon">⌕</span> qmd Search Engine</h2>
-      <p class="subtitle">Tobi L\u00fctke's local hybrid search \u2014 tested and found wanting for the full workflow.</p>
+      <h2><span class="section-icon">⌕</span> Qdrant Search Engine</h2>
+      <p class="subtitle">Qdrant vector database + Voyage AI embeddings \u2014 each highlight is one vector with structured metadata.</p>
 
-      <h3>What qmd Does Well</h3>
+      <h3>How It Works</h3>
       <ul>
-        <li><strong>BM25</strong> full-text search (keyword matching)</li>
-        <li><strong>Vector semantic search</strong> (meaning matching)</li>
-        <li><strong>LLM re-ranking</strong> (relevance scoring)</li>
-        <li><strong>Query expansion</strong> (rewrites queries for better recall)</li>
+        <li><strong>Voyage AI</strong> (voyage-4-large) generates embeddings for each highlight</li>
+        <li><strong>Qdrant</strong> stores vectors with structured metadata payloads</li>
+        <li><strong>Semantic search</strong> finds conceptual matches across the entire library</li>
+        <li><strong>Metadata filters</strong>: genre, tags, favorites, author \u2014 all supported</li>
       </ul>
 
       <div class="stat-row">
-        <div class="stat-card"><div class="value">15</div><div class="desc">Books Tested</div></div>
-        <div class="stat-card"><div class="value">269</div><div class="desc">Files Indexed</div></div>
-        <div class="stat-card"><div class="value">543</div><div class="desc">Embedded Chunks</div></div>
-        <div class="stat-card"><div class="value">93%</div><div class="desc">Top Match Score</div></div>
+        <div class="stat-card"><div class="value">21,925</div><div class="desc">Vectors Indexed</div></div>
+        <div class="stat-card"><div class="value">257</div><div class="desc">Books Indexed</div></div>
+        <div class="stat-card"><div class="value">18/18</div><div class="desc">Tests Passed</div></div>
+        <div class="stat-card"><div class="value" style="color:var(--green)">v1.0</div><div class="desc">Tagged & Shipped</div></div>
       </div>
 
-      <h3 style="color:#fc8181">⚠ Discovered Limitations</h3>
+      <h3>Index Breakdown</h3>
+      <table class="data-table">
+        <tr><th>Category</th><th>Highlights</th></tr>
+        <tr><td>Nonfiction</td><td>16,448</td></tr>
+        <tr><td>Fiction</td><td>5,228</td></tr>
+        <tr><td>Favorites</td><td>10,142</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>21,925</strong></td></tr>
+      </table>
 
-      <div style="background:var(--red-dim); border:1px solid rgba(229,62,62,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
-        <h4 style="color:#fc8181; font-size:13px; margin-bottom:8px;">Limitation 1: Chunking ignores document structure</h4>
-        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">qmd's 800-token chunker splits at token boundaries, not highlight boundaries. YAML frontmatter (~80-100 tokens) eats into the budget.</p>
+      <h3>Why Qdrant Over qmd</h3>
+
+      <div style="background:var(--green-dim); border:1px solid rgba(56,161,105,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
+        <h4 style="color:#68d391; font-size:13px; margin-bottom:8px;">Solved: Metadata filtering</h4>
+        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">Full filtering by genre, tags, favorites, and author. qmd only supported collection-level filtering.</p>
       </div>
 
-      <div style="background:var(--red-dim); border:1px solid rgba(229,62,62,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
-        <h4 style="color:#fc8181; font-size:13px; margin-bottom:8px;">Limitation 2: No metadata filtering (BLOCKER)</h4>
-        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">Cannot filter by genre, tags, favorites, or any YAML field. Only filter is <code>-c</code> (collection name). Confirmed by reviewing CLI help and GitHub repo.</p>
+      <div style="background:var(--green-dim); border:1px solid rgba(56,161,105,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
+        <h4 style="color:#68d391; font-size:13px; margin-bottom:8px;">Solved: Clean highlight text</h4>
+        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">Each highlight is stored as its own vector \u2014 no YAML pollution, no arbitrary chunking.</p>
       </div>
 
-      <div style="background:var(--red-dim); border:1px solid rgba(229,62,62,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
-        <h4 style="color:#fc8181; font-size:13px; margin-bottom:8px;">Limitation 3: YAML pollutes search results (BLOCKER)</h4>
-        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">YAML keywords compete with actual highlights. Query for \u201cindia climate story\u201d returned YAML block at 92% instead of highlight content.</p>
+      <div style="background:var(--green-dim); border:1px solid rgba(56,161,105,0.3); border-radius:var(--radius); padding:16px; margin:12px 0;">
+        <h4 style="color:#68d391; font-size:13px; margin-bottom:8px;">Solved: Structured output for Claude</h4>
+        <p style="font-size:12px; color:var(--gray-200); line-height:1.6;">Search results include highlight text + metadata payload \u2014 ready for Claude to synthesize.</p>
       </div>
 
-      <div style="background:rgba(160,174,192,0.08); border:1px solid rgba(160,174,192,0.15); border-radius:var(--radius); padding:16px; margin:12px 0;">
-        <h4 style="color:var(--gray-300); font-size:13px; margin-bottom:8px;">Limitation 4: _Index.md files appear as noise</h4>
-        <p style="font-size:12px; color:var(--gray-400); line-height:1.6;">Index files surface in results. Low impact \u2014 they score low \u2014 but add clutter.</p>
-      </div>
+      <h3>Acceptance Tests (18/18)</h3>
+      <p style="font-size:12px; color:var(--gray-300); line-height:1.6;">Parser, indexing, search, filters, stale cleanup, error handling \u2014 all passing.</p>
     </div>`;
 }
 
@@ -1259,23 +1274,33 @@ function renderSessions() {
   return `
     <div class="content-card">
       <h2><span class="section-icon">◷</span> Session History</h2>
-      <p class="subtitle">Three working sessions across January 30\u201331, 2026.</p>
+      <p class="subtitle">Five working sessions from January 30 to February 24, 2026.</p>
 
       <div class="timeline">
         <div class="timeline-item s1">
           <h4>Session 1 \u2014 Jan 30 (Morning)</h4>
-          <p>Vault audit ✅ \u2022 bun + qmd installed ✅ \u2022 All 6 Python scripts built ✅ \u2022 Dependencies installed ✅</p>
+          <p>Vault audit ✅ \u2022 bun + qmd installed ✅ \u2022 6 Python scripts built ✅ \u2022 Dependencies installed ✅</p>
           <p style="margin-top:6px;">Key finding: 270 book files, 154 need splitting, 17 are huge (&gt;30K words).</p>
         </div>
         <div class="timeline-item s2">
           <h4>Session 2 \u2014 Jan 30 (Afternoon)</h4>
-          <p>Registry populated (267 books, OL-only) ✅ \u2022 User reviewed CSV ✅ \u2022 YAML finalized (126 fiction, 139 nonfiction, 79 favorites) ✅ \u2022 5-book split test ✅</p>
-          <p style="margin-top:6px;">Google Books API removed (quota exhausted). <code>populate_book_registry.py</code> significantly refactored.</p>
+          <p>Registry populated (267 books, OL-only) ✅ \u2022 YAML finalized (126 fiction, 139 nonfiction, 79 favorites) ✅ \u2022 5-book split test ✅</p>
+          <p style="margin-top:6px;">Google Books API removed (quota exhausted). <code>populate_book_registry.py</code> refactored.</p>
         </div>
-        <div class="timeline-item s3">
+        <div class="timeline-item s2">
           <h4>Session 3 \u2014 Jan 31</h4>
-          <p>qmd collection set up ✅ \u2022 5-book test (search quality good, 93% scores) ✅ \u2022 Expanded to 15 books (269 files, 543 chunks) ✅ \u2022 <strong style="color:#fc8181">Limitations discovered ⚠️</strong></p>
-          <p style="margin-top:6px;">YAML pollution + no metadata filtering = <strong>architecture decision needed</strong> before proceeding.</p>
+          <p>qmd collection set up ✅ \u2022 15-book test (269 files, 543 chunks) ✅ \u2022 Limitations discovered: YAML pollution, no metadata filtering ⚠️</p>
+          <p style="margin-top:6px;">Architecture decision needed \u2014 qmd cannot support the full essay workflow.</p>
+        </div>
+        <div class="timeline-item s1">
+          <h4>Session 4 \u2014 Feb 19</h4>
+          <p>Workspace cleanup ✅ \u2022 Legacy qmd/site assets moved out ✅ \u2022 Roam archives consolidated ✅</p>
+          <p style="margin-top:6px;">Archived <code>roam_export_cleaned</code> and <code>Roam-Images</code> to external archive directory.</p>
+        </div>
+        <div class="timeline-item s1">
+          <h4>Session 5 \u2014 Feb 24 (Final)</h4>
+          <p>Voyage AI account + API key ✅ \u2022 Python venv created ✅ \u2022 Qdrant 1.17.0 via Docker ✅ \u2022 All 7 RAG scripts built ✅ \u2022 <strong style="color:#68d391">21,925 highlights indexed, 0 errors ✅</strong></p>
+          <p style="margin-top:6px;">18/18 acceptance tests passed. GitHub repo created (<code>kumarshyam42/research-system</code>), tagged v1.0. <strong>Project 3 complete.</strong></p>
         </div>
       </div>
     </div>`;
@@ -1286,15 +1311,28 @@ function renderDecisionView() {
   return `
     <div class="content-card">
       <h2><span class="section-icon">⚡</span> Architecture Decision</h2>
-      <p class="subtitle">qmd tested and found limited. Choose an architecture to unblock the project. Click an option below.</p>
+      <p class="subtitle">Decided: Qdrant + Voyage AI. qmd was tested and found limited \u2014 replaced with a purpose-built vector search stack.</p>
 
-      <h3>The Core Problem</h3>
-      <p>The essay workflow needs: <strong>(1)</strong> clean highlight text returned, <strong>(2)</strong> metadata filtering by genre/tags/favorites, <strong>(3)</strong> structured output for Claude. qmd cannot do #2 or #3, and #1 is unreliable.</p>
+      <h3>The Core Problem (Solved)</h3>
+      <p>The essay workflow needed: <strong>(1)</strong> clean highlight text returned, <strong>(2)</strong> metadata filtering by genre/tags/favorites, <strong>(3)</strong> structured output for Claude. Qdrant + Voyage AI solves all three.</p>
 
+      <div style="background:var(--green-dim); border:1px solid rgba(56,161,105,0.3); border-radius:var(--radius); padding:20px; margin:16px 0;">
+        <h3 style="margin-top:0; color:#68d391;">Chosen: Option C \u2014 Qdrant + Voyage AI</h3>
+        <ul>
+          <li>Each book highlight is one vector with structured metadata</li>
+          <li>Semantic search with <strong>voyage-4-large</strong> embeddings</li>
+          <li>Full metadata filtering: genre, tags, favorites, author</li>
+          <li>Qdrant 1.17.0 running locally via Docker (port 6333)</li>
+          <li>Incremental update workflow for new Readwise syncs</li>
+          <li>21,925 highlights indexed from 257 books, 0 errors</li>
+        </ul>
+      </div>
+
+      <h3>Options Considered</h3>
       <div class="arch-grid">
         ${ARCH_OPTIONS.map(a => `
-          <div class="arch-card ${state.selectedArch === a.id ? 'selected' : ''}" onclick="selectArch('${a.id}')">
-            <h4>Option ${a.id}: ${a.name}</h4>
+          <div class="arch-card ${a.id === 'C' ? 'selected' : ''}" onclick="selectArch('${a.id}')">
+            <h4>Option ${a.id}: ${a.name} ${a.id === 'C' ? '✅' : ''}</h4>
             <p>${a.short}</p>
             <div class="pros">✓ ${a.pros}</div>
             <div class="cons">✗ ${a.cons}</div>
@@ -1304,11 +1342,9 @@ function renderDecisionView() {
 
       ${selected ? `
       <div style="background:var(--teal-dim); border:1px solid var(--teal-mid); border-radius:var(--radius); padding:20px; margin-top:16px;">
-        <h3 style="margin-top:0; color:var(--teal);">Selected: Option ${selected.id} \u2014 ${selected.name}</h3>
+        <h3 style="margin-top:0; color:var(--teal);">Option ${selected.id} \u2014 ${selected.name}</h3>
         ${renderArchDetail(selected.id)}
-      </div>` : `
-      <p style="color:var(--gray-400); font-style:italic; margin-top:16px;">Click an option above to see full details.</p>
-      `}
+      </div>` : ''}
     </div>`;
 }
 
@@ -1328,10 +1364,12 @@ function renderArchDetail(id) {
       <li>Need embedding model (Voyage AI or local)</li>
     </ul>`,
     C: `<ul>
-      <li>Drop qmd entirely, build Chroma-based search</li>
-      <li>One system, structured metadata, clean output</li>
-      <li>Lose qmd's hybrid search (BM25 + vector + reranking)</li>
-      <li>Simplest long-term maintenance</li>
+      <li>Replaced qmd with Qdrant vector DB + Voyage AI embeddings</li>
+      <li>One system: structured metadata, clean output, semantic search</li>
+      <li>21,925 highlights indexed from 257 books</li>
+      <li>Full metadata filtering: genre, tags, favorites, author</li>
+      <li>Qdrant 1.17.0 via Docker, voyage-4-large embeddings</li>
+      <li>Incremental update workflow for ongoing Readwise syncs</li>
     </ul>`,
     D: `<ul>
       <li>Store highlights in SQLite with metadata columns</li>
@@ -1347,33 +1385,32 @@ function renderNext() {
   return `
     <div class="content-card">
       <h2><span class="section-icon">▶</span> What\u2019s Next</h2>
-      <p class="subtitle">Blocked on architecture decision. Everything downstream depends on it.</p>
+      <p class="subtitle">Project 3 is complete. Next up: Project 2 Phase 3 and Project 5 (Substack essays).</p>
 
-      <h3>Immediate Next Steps</h3>
+      <h3>Project 3: Completed ✅</h3>
+      <div>
+        <div class="checklist-item done"><span class="check">✓</span> All book highlights indexed (21,925 from 257 books)</div>
+        <div class="checklist-item done"><span class="check">✓</span> Search returns relevant results with metadata filtering</div>
+        <div class="checklist-item done"><span class="check">✓</span> Each highlight has complete metadata (genre, tags, favorites, author)</div>
+        <div class="checklist-item done"><span class="check">✓</span> Ongoing workflow documented and working (incremental updates)</div>
+        <div class="checklist-item done"><span class="check">✓</span> 18/18 acceptance tests passing</div>
+        <div class="checklist-item done"><span class="check">✓</span> GitHub repo tagged v1.0</div>
+      </div>
+
+      <h3>Project 2: Remaining Work</h3>
+      <div>
+        <div class="checklist-item done"><span class="check">✓</span> Phase 1: Syntax conversion (199 files)</div>
+        <div class="checklist-item done"><span class="check">✓</span> Phase 2: Images (278 downloaded + linked)</div>
+        <div class="checklist-item pending"><span class="check"></span> Phase 3: Folder organization (flat + metadata vs folders)</div>
+        <div class="checklist-item pending"><span class="check"></span> Verify notes in Obsidian (links, images, search)</div>
+      </div>
+
+      <h3>Up Next: Project 5 \u2014 Substack Essays</h3>
       <ol>
-        <li><strong style="color:var(--gold);">Decide on architecture</strong> (Options A\u2013D). This is a blocking decision.</li>
-        <li>If keeping qmd: strip YAML from indexed copies to fix frontmatter pollution.</li>
-        <li>If adding Chroma: build indexing script for individual highlights with metadata.</li>
-        <li>Full split of remaining ~252 books.</li>
-        <li>Full indexing.</li>
-        <li>Validation searches.</li>
+        <li>Begin essay research using the RAG system</li>
+        <li>Use semantic search + Claude to find patterns across books</li>
+        <li>Write and publish first essay on Substack</li>
       </ol>
-
-      <h3>Success Criteria</h3>
-      <div>
-        <div class="checklist-item pending"><span class="check"></span> All book highlights indexed</div>
-        <div class="checklist-item pending"><span class="check"></span> Search returns relevant results</div>
-        <div class="checklist-item done"><span class="check">✓</span> Each file has complete YAML metadata</div>
-        <div class="checklist-item pending"><span class="check"></span> Ongoing workflow documented and working</div>
-      </div>
-
-      <h3>Quality Bar</h3>
-      <div>
-        <div class="checklist-item pending"><span class="check"></span> <code>qmd query "leadership frameworks"</code> → relevant chapters</div>
-        <div class="checklist-item pending"><span class="check"></span> <code>qmd query "Lenin critique of banks"</code> → Bankers and Bolsheviks</div>
-        <div class="checklist-item pending"><span class="check"></span> Results show clear titles (not \u201cChunk 23\u201d)</div>
-        <div class="checklist-item done"><span class="check">✓</span> No highlight split mid-thought</div>
-      </div>
     </div>`;
 }
 
