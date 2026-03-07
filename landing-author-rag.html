@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AuthorRAG — Turn Your Books Into a Searchable Knowledge Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+  :root {
+    --navy: #0F172A;
+    --navy-light: #1E293B;
+    --navy-mid: #334155;
+    --gold: #D97706;
+    --gold-light: #F59E0B;
+    --gold-glow: rgba(217,119,6,0.15);
+    --gold-border: rgba(217,119,6,0.3);
+    --cream: #FFFBEB;
+    --warm: #FEF3C7;
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --white: #FFFFFF;
+    --surface: #1E293B;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--navy); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(15,23,42,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-size: 20px; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .nav-logo .icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: white;
+  }
+  .nav-logo .highlight { color: var(--gold-light); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    text-decoration: none; color: var(--text-muted); font-size: 14px;
+    font-weight: 500; transition: 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--gold) !important; color: white !important;
+    padding: 10px 24px !important; border-radius: 100px !important;
+    font-weight: 700 !important; font-size: 14px !important;
+    transition: all 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--gold-light) !important; transform: translateY(-1px); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 160px 24px 100px;
+    text-align: center; max-width: 860px; margin: 0 auto;
+    position: relative;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(217,119,6,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-glow); border: 1px solid var(--gold-border);
+    padding: 6px 18px; border-radius: 100px;
+    font-size: 13px; font-weight: 600; color: var(--gold-light);
+    margin-bottom: 32px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 900; line-height: 1.08;
+    letter-spacing: -0.02em; margin-bottom: 24px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 20px; line-height: 1.7; color: var(--text-muted);
+    max-width: 580px; margin: 0 auto 40px;
+  }
+  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: white; border: none;
+    padding: 16px 40px; border-radius: 100px; font-size: 17px;
+    font-weight: 700; cursor: pointer; text-decoration: none;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(217,119,6,0.3); }
+  .btn-secondary {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+    padding: 14px 32px; border-radius: 100px; font-size: 16px;
+    font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text-dim); }
+
+  /* ── Demo ── */
+  .demo-section {
+    max-width: 860px; margin: 0 auto; padding: 0 24px 100px;
+  }
+  .demo-window {
+    background: var(--navy-light); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  }
+  .demo-bar {
+    background: var(--navy); padding: 14px 20px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .demo-dot:nth-child(1) { background: #EF4444; }
+  .demo-dot:nth-child(2) { background: #F59E0B; }
+  .demo-dot:nth-child(3) { background: #22C55E; }
+  .demo-url {
+    flex: 1; margin-left: 12px;
+    font-size: 12px; color: var(--text-dim);
+    background: var(--navy-light); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 6px;
+  }
+  .demo-header {
+    padding: 24px 28px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .demo-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: white;
+  }
+  .demo-author-name { font-size: 15px; font-weight: 700; }
+  .demo-author-sub { font-size: 12px; color: var(--text-dim); }
+  .demo-powered { font-size: 10px; color: var(--text-dim); }
+  .demo-body { padding: 24px 28px; }
+  .demo-search {
+    width: 100%; background: var(--navy);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px 16px 48px; font-size: 15px;
+    color: var(--text); font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-position: 18px center; background-repeat: no-repeat;
+  }
+  .demo-search:focus { border-color: var(--gold); }
+  .demo-results { margin-top: 16px; }
+  .demo-result {
+    padding: 16px 18px; border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 10px;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .demo-result:hover { border-color: var(--gold-border); background: rgba(217,119,6,0.05); }
+  .demo-result-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .demo-result-source {
+    font-size: 11px; font-weight: 700; color: var(--gold-light);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .demo-result-score {
+    font-size: 10px; font-weight: 600; color: var(--text-dim);
+    background: var(--navy); padding: 2px 8px; border-radius: 4px;
+  }
+  .demo-result-text { font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+  .demo-result-text mark {
+    background: var(--gold-glow); color: var(--gold-light);
+    padding: 1px 3px; border-radius: 2px;
+  }
+  .demo-result-ref {
+    font-size: 11px; color: var(--text-dim); margin-top: 6px;
+  }
+
+  /* ── Value Props ── */
+  .value-props {
+    padding: 100px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .vp-inner { max-width: 1000px; margin: 0 auto; }
+  .section-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--gold); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.15;
+  }
+  .section-subtitle {
+    font-size: 17px; color: var(--text-muted); max-width: 500px;
+    line-height: 1.6; margin-bottom: 56px;
+  }
+  .vp-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .vp-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; transition: all 0.3s;
+  }
+  .vp-card:hover { border-color: var(--gold-border); transform: translateY(-4px); }
+  .vp-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--gold-glow); border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .vp-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .vp-card p { font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+
+  /* ── How It Works ── */
+  .how-it-works {
+    padding: 100px 24px;
+    background: var(--surface); border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .hiw-inner { max-width: 900px; margin: 0 auto; }
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: grid; grid-template-columns: 64px 1fr; gap: 24px;
+    padding: 36px 0; border-bottom: 1px solid var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-number {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--gold-glow); border: 1px solid var(--gold-border);
+    color: var(--gold-light); font-size: 22px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .step p { font-size: 16px; line-height: 1.7; color: var(--text-muted); }
+
+  /* ── Content Types ── */
+  .content-types {
+    padding: 100px 24px;
+  }
+  .ct-inner { max-width: 900px; margin: 0 auto; }
+  .ct-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  }
+  .ct-item {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px; transition: 0.2s;
+  }
+  .ct-item:hover { border-color: var(--gold-border); }
+  .ct-icon { font-size: 28px; flex-shrink: 0; }
+  .ct-item h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .ct-item p { font-size: 13px; color: var(--text-dim); }
+
+  /* ── Social Proof ── */
+  .social-proof {
+    padding: 80px 24px; text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stats {
+    max-width: 700px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+  }
+  .stat-number {
+    font-size: 48px; font-weight: 900; letter-spacing: -0.02em;
+    color: var(--gold-light);
+  }
+  .stat-label { font-size: 14px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Author Testimonial ── */
+  .testimonial {
+    padding: 100px 24px; text-align: center;
+  }
+  .testimonial-inner {
+    max-width: 680px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 48px 40px;
+    position: relative;
+  }
+  .testimonial-inner::before {
+    content: '\201C'; position: absolute; top: -8px; left: 36px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 80px; color: var(--gold); opacity: 0.3; line-height: 1;
+  }
+  .testimonial blockquote {
+    font-size: 20px; line-height: 1.7; color: var(--text);
+    font-style: italic; margin-bottom: 24px;
+  }
+  .testimonial-author { font-size: 15px; font-weight: 700; }
+  .testimonial-role { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ── Pricing ── */
+  .pricing {
+    padding: 100px 24px; text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .pricing-grid {
+    max-width: 1000px; margin: 48px auto 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    text-align: left;
+  }
+  .price-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px 28px; position: relative;
+    transition: all 0.3s;
+  }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-card.featured {
+    border-color: var(--gold);
+    box-shadow: 0 8px 40px rgba(217,119,6,0.12);
+  }
+  .price-card.featured::before {
+    content: 'Recommended'; position: absolute; top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: white; font-size: 11px; font-weight: 700;
+    padding: 4px 16px; border-radius: 100px; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .price-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .price-amount { font-size: 44px; font-weight: 900; margin-bottom: 4px; }
+  .price-amount span { font-size: 16px; font-weight: 500; color: var(--text-dim); }
+  .price-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.5; }
+  .price-features { list-style: none; margin-bottom: 28px; }
+  .price-features li {
+    padding: 7px 0; font-size: 14px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .price-features li::before { content: '\2713'; color: var(--gold-light); font-weight: 700; }
+  .price-btn {
+    width: 100%; padding: 14px; border-radius: 100px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    border: none; font-family: inherit; transition: all 0.2s;
+    text-align: center; display: block; text-decoration: none;
+  }
+  .price-btn.primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: white;
+  }
+  .price-btn.primary:hover { box-shadow: 0 4px 20px rgba(217,119,6,0.3); }
+  .price-btn.secondary { background: var(--navy); color: var(--text); border: 1px solid var(--border); }
+  .price-btn.secondary:hover { border-color: var(--text-dim); }
+
+  /* ── Revenue Calculator ── */
+  .calculator {
+    padding: 100px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .calc-inner {
+    max-width: 700px; margin: 0 auto; text-align: center;
+  }
+  .calc-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px; margin-top: 48px; text-align: left;
+  }
+  .calc-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .calc-row:last-child { border-bottom: none; }
+  .calc-row.total {
+    border-top: 2px solid var(--gold-border); border-bottom: none;
+    margin-top: 8px; padding-top: 20px;
+  }
+  .calc-label { font-size: 15px; color: var(--text-muted); }
+  .calc-value { font-size: 15px; font-weight: 700; color: var(--text); }
+  .calc-value.gold { color: var(--gold-light); font-size: 28px; font-weight: 900; }
+  .calc-note { font-size: 13px; color: var(--text-dim); margin-top: 20px; text-align: center; line-height: 1.6; }
+
+  /* ── FAQ ── */
+  .faq {
+    padding: 100px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .faq-inner { max-width: 700px; margin: 0 auto; }
+  .faq-item {
+    border-bottom: 1px solid var(--border); padding: 24px 0;
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .faq-a { font-size: 15px; line-height: 1.7; color: var(--text-muted); }
+
+  /* ── Final CTA ── */
+  .final-cta {
+    padding: 120px 24px; text-align: center;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-light) 100%);
+    position: relative;
+  }
+  .final-cta::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .final-cta h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 4vw, 48px); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 16px;
+  }
+  .final-cta p {
+    font-size: 18px; color: var(--text-muted);
+    margin-bottom: 40px; max-width: 500px;
+    margin-left: auto; margin-right: auto; line-height: 1.6;
+  }
+
+  footer {
+    padding: 40px 24px; text-align: center;
+    font-size: 13px; color: var(--text-dim);
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+    .vp-grid { grid-template-columns: 1fr; }
+    .ct-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; gap: 24px; }
+    .step { grid-template-columns: 48px 1fr; gap: 16px; }
+    .testimonial-inner { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">
+    <div class="icon">A</div>
+    Author<span class="highlight">RAG</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="nav-cta">Book a Demo</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">
+    <span>&#9679;</span> For authors, speakers &amp; trainers
+  </div>
+  <h1>Your books become a<br><em>living knowledge platform</em></h1>
+  <p>Turn your books, talks, and content into a branded AI-powered search tool your clients pay to access. Your intellectual property, working for you 24/7.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-primary">Book a Demo &rarr;</a>
+    <a href="#how" class="btn-secondary">See How It Works</a>
+  </div>
+</section>
+
+<!-- Demo -->
+<section class="demo-section">
+  <div class="demo-window">
+    <div class="demo-bar">
+      <div class="demo-dot"></div>
+      <div class="demo-dot"></div>
+      <div class="demo-dot"></div>
+      <div class="demo-url">library.jamesclark.com</div>
+    </div>
+    <div class="demo-header">
+      <div class="demo-brand">
+        <div class="demo-avatar">JC</div>
+        <div>
+          <div class="demo-author-name">James Clark's Knowledge Library</div>
+          <div class="demo-author-sub">Search across 4 books, 200+ articles, and 50 keynotes</div>
+        </div>
+      </div>
+      <div class="demo-powered">Powered by AuthorRAG</div>
+    </div>
+    <div class="demo-body">
+      <input class="demo-search" type="text" value="How should I handle conflict in my leadership team?" readonly>
+      <div class="demo-results">
+        <div class="demo-result">
+          <div class="demo-result-meta">
+            <span class="demo-result-source">Leading Through Chaos &mdash; Chapter 7</span>
+            <span class="demo-result-score">97% match</span>
+          </div>
+          <div class="demo-result-text">"<mark>Conflict in leadership teams</mark> is not a bug &mdash; it's a feature. The question isn't how to eliminate it, but how to <mark>channel disagreement into better decisions</mark> without eroding trust."</div>
+          <div class="demo-result-ref">Page 142 &middot; Section: Productive Friction</div>
+        </div>
+        <div class="demo-result">
+          <div class="demo-result-meta">
+            <span class="demo-result-source">Keynote &mdash; SHRM Conference 2025</span>
+            <span class="demo-result-score">93% match</span>
+          </div>
+          <div class="demo-result-text">"The three-step framework I use with every executive team: <mark>name the tension</mark>, separate the person from the position, and <mark>commit to a decision window</mark>."</div>
+          <div class="demo-result-ref">Timestamp 23:14 &middot; Video transcript</div>
+        </div>
+        <div class="demo-result">
+          <div class="demo-result-meta">
+            <span class="demo-result-source">Blog &mdash; "Why Your Team Fights"</span>
+            <span class="demo-result-score">89% match</span>
+          </div>
+          <div class="demo-result-text">"Most <mark>team conflict</mark> stems from misaligned expectations, not personality clashes. Start by aligning on outcomes before debating methods."</div>
+          <div class="demo-result-ref">Published March 2024 &middot; Blog post</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Value Props -->
+<section class="value-props" id="features">
+  <div class="vp-inner">
+    <div class="section-label">Why AuthorRAG</div>
+    <h2 class="section-title">Your content is the moat. We make it searchable.</h2>
+    <p class="section-subtitle">Stop letting your best thinking sit in static PDFs. Give your clients an AI-powered tool grounded in your frameworks, your voice, your expertise.</p>
+    <div class="vp-grid">
+      <div class="vp-card">
+        <div class="vp-icon">&#128218;</div>
+        <h3>Your Content, Your Brand</h3>
+        <p>Custom domain, your logo, your colors. Clients see your brand — not ours. It's your knowledge platform.</p>
+      </div>
+      <div class="vp-card">
+        <div class="vp-icon">&#128270;</div>
+        <h3>Answers With Citations</h3>
+        <p>Every response cites the exact book chapter, page number, talk timestamp, or blog post. No hallucinations — only your words.</p>
+      </div>
+      <div class="vp-card">
+        <div class="vp-icon">&#128176;</div>
+        <h3>New Revenue Stream</h3>
+        <p>Charge clients monthly for access. Bundle with training packages. Use as a premium subscriber perk. Your IP, monetized continuously.</p>
+      </div>
+      <div class="vp-card">
+        <div class="vp-icon">&#128200;</div>
+        <h3>Client Intelligence</h3>
+        <p>See what your clients are asking about most. Discover content gaps. Use query analytics to plan your next book, course, or keynote.</p>
+      </div>
+      <div class="vp-card">
+        <div class="vp-icon">&#128274;</div>
+        <h3>Access Control</h3>
+        <p>Invite-only, paywall, or open access. Gate by client email, team, or subscription tier. You decide who gets in.</p>
+      </div>
+      <div class="vp-card">
+        <div class="vp-icon">&#9889;</div>
+        <h3>Always Up to Date</h3>
+        <p>Publish a new blog post or upload a new talk? It's indexed and searchable within minutes. Your library grows with you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Content Types -->
+<section class="content-types">
+  <div class="ct-inner">
+    <div class="section-label">What Gets Indexed</div>
+    <h2 class="section-title">Everything you've ever created. Searchable.</h2>
+    <p class="section-subtitle">Upload once. We chunk, embed, and index automatically.</p>
+    <div class="ct-grid">
+      <div class="ct-item">
+        <div class="ct-icon">&#128214;</div>
+        <div>
+          <h4>Books</h4>
+          <p>PDF or EPUB. Indexed by chapter and section with page references.</p>
+        </div>
+      </div>
+      <div class="ct-item">
+        <div class="ct-icon">&#128221;</div>
+        <div>
+          <h4>Blog Posts &amp; Articles</h4>
+          <p>URL import or RSS feed. Auto-crawled and kept in sync.</p>
+        </div>
+      </div>
+      <div class="ct-item">
+        <div class="ct-icon">&#127908;</div>
+        <div>
+          <h4>Podcasts &amp; Interviews</h4>
+          <p>Audio transcribed and indexed with timestamps.</p>
+        </div>
+      </div>
+      <div class="ct-item">
+        <div class="ct-icon">&#127909;</div>
+        <div>
+          <h4>Keynotes &amp; Videos</h4>
+          <p>YouTube or uploaded video. Transcribed and searchable.</p>
+        </div>
+      </div>
+      <div class="ct-item">
+        <div class="ct-icon">&#128444;</div>
+        <div>
+          <h4>Workshop Slides</h4>
+          <p>PowerPoint and PDF decks. Text extracted and indexed.</p>
+        </div>
+      </div>
+      <div class="ct-item">
+        <div class="ct-icon">&#9993;</div>
+        <div>
+          <h4>Newsletters</h4>
+          <p>Archive import. Every edition searchable by topic.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works" id="how">
+  <div class="hiw-inner">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">From content to platform in days, not months</h2>
+    <p class="section-subtitle">We handle the technology. You keep creating.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div>
+          <h3>Send us your content</h3>
+          <p>Upload your books, share your blog URLs, send us your talk recordings. We take it from there — parsing, transcribing, and organizing everything.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div>
+          <h3>We build your knowledge base</h3>
+          <p>Your content is chunked semantically, embedded with AI, and indexed into a search engine that understands meaning — not just keywords. Every answer traces back to your original source.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div>
+          <h3>Brand and customize</h3>
+          <p>Choose your colors, upload your logo, connect your custom domain. Your clients will see your brand, your name, your platform. We stay invisible.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <div>
+          <h3>Launch and monetize</h3>
+          <p>Share access with your clients, training participants, and subscribers. Charge monthly, bundle with programs, or offer as a premium perk. Watch the analytics roll in.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Social Proof -->
+<section class="social-proof">
+  <div class="stats">
+    <div>
+      <div class="stat-number">&lt;0.5s</div>
+      <div class="stat-label">Average query response</div>
+    </div>
+    <div>
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Answers cite original sources</div>
+    </div>
+    <div>
+      <div class="stat-number">6</div>
+      <div class="stat-label">Content types supported</div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonial -->
+<section class="testimonial">
+  <div class="testimonial-inner">
+    <blockquote>I've written four books and given hundreds of talks. My clients used to email me asking 'Which chapter covers X?' Now they just search my library. It's like having a clone of me available 24/7.</blockquote>
+    <div class="testimonial-author">Example Author Testimonial</div>
+    <div class="testimonial-role">Placeholder for early adopter</div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 class="section-title">We grow when you grow</h2>
+  <p class="section-subtitle" style="margin: 0 auto 8px; max-width: 500px;">Choose the model that fits your business. Both include full platform setup and onboarding.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Starter</div>
+      <div class="price-amount">$149<span>/mo</span></div>
+      <div class="price-desc">+ 15% revenue share on client subscriptions. Perfect for authors launching their first knowledge product.</div>
+      <ul class="price-features">
+        <li>1 book + blog content indexed</li>
+        <li>Branded search interface</li>
+        <li>Basic analytics dashboard</li>
+        <li>Email-gated access control</li>
+        <li>Up to 100 active client users</li>
+      </ul>
+      <a href="#" class="price-btn secondary">Get Started</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-name">Professional</div>
+      <div class="price-amount">$349<span>/mo</span></div>
+      <div class="price-desc">+ 10% revenue share. For established authors with multiple books and active training practices.</div>
+      <ul class="price-features">
+        <li>Up to 5 books + unlimited blogs/talks</li>
+        <li>Custom domain (library.yourname.com)</li>
+        <li>Video &amp; podcast transcription</li>
+        <li>Advanced analytics &amp; query insights</li>
+        <li>Unlimited client users</li>
+        <li>Embeddable widget for your site</li>
+      </ul>
+      <a href="#" class="price-btn primary">Book a Demo</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount">$799<span>/mo</span></div>
+      <div class="price-desc">+ 5% revenue share. For high-volume speakers and multi-author training companies.</div>
+      <ul class="price-features">
+        <li>Unlimited content, all formats</li>
+        <li>API access for custom integrations</li>
+        <li>Multi-author support</li>
+        <li>White-label (our branding removed)</li>
+        <li>Priority support &amp; onboarding</li>
+        <li>Custom AI response tuning</li>
+      </ul>
+      <a href="#" class="price-btn secondary">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- Revenue Calculator -->
+<section class="calculator">
+  <div class="calc-inner">
+    <div class="section-label">Revenue Potential</div>
+    <h2 class="section-title">What 200 clients looks like</h2>
+    <p class="section-subtitle" style="margin: 0 auto;">A back-of-napkin calculation for the Professional plan.</p>
+    <div class="calc-box">
+      <div class="calc-row">
+        <span class="calc-label">Your client subscription price</span>
+        <span class="calc-value">$29/month</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Number of paying clients</span>
+        <span class="calc-value">200</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Gross monthly revenue</span>
+        <span class="calc-value">$5,800</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Platform fee (Professional)</span>
+        <span class="calc-value">-$349</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Revenue share (10%)</span>
+        <span class="calc-value">-$580</span>
+      </div>
+      <div class="calc-row total">
+        <span class="calc-label">Your monthly take-home</span>
+        <span class="calc-value gold">$4,871</span>
+      </div>
+    </div>
+    <div class="calc-note">That's $58,452/year in recurring revenue from content you've already created.<br>No new writing. No extra speaking gigs. Your existing IP, working for you.</div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-inner">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Common questions</h2>
+    <div style="margin-top: 40px;">
+      <div class="faq-item">
+        <div class="faq-q">What if the AI makes up answers that aren't in my content?</div>
+        <div class="faq-a">It won't. AuthorRAG uses strict retrieval-augmented generation — every answer is grounded in your actual content with source citations. If your content doesn't cover a topic, the system says so rather than guessing.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I retain ownership of my content?</div>
+        <div class="faq-a">Absolutely. You own all your intellectual property. We index it for search purposes only. Your content is never shared with other authors, used for AI training, or made public. Delete your account and everything is removed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do my clients access the platform?</div>
+        <div class="faq-a">You share a link to your branded knowledge library (e.g., library.yourname.com). You control access — invite by email, require a subscription, or make it open. It works on any device, no app download needed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How long does setup take?</div>
+        <div class="faq-a">Most authors are live within 5-7 business days. You send us your content, we handle the technical setup — parsing, indexing, branding, and deployment. You review and approve before launch.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I see what clients are searching for?</div>
+        <div class="faq-a">Yes. Your analytics dashboard shows popular queries, trending topics, content gaps (questions your content doesn't cover well), and usage patterns. Many authors use this data to plan their next book or course.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+  <h2>Your best thinking shouldn't<br>gather dust on a shelf</h2>
+  <p>Turn your books and talks into a knowledge platform your clients will use every week — and pay for monthly.</p>
+  <a href="#" class="btn-primary">Book a Demo &rarr;</a>
+</section>
+
+<footer>
+  &copy; 2026 AuthorRAG. All rights reserved.
+</footer>
+
+</body>
+</html>

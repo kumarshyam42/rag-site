@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Copilot — Write With Everything You've Read</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --violet: #7C3AED;
+    --violet-light: #A78BFA;
+    --violet-dark: #5B21B6;
+    --violet-bg: #F5F3FF;
+    --ink: #1E1B4B;
+    --ink-light: #3730A3;
+    --ink-muted: #6B7280;
+    --white: #FFFFFF;
+    --gray-bg: #FAFAFA;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--violet-dark);
+  }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    text-decoration: none; color: var(--ink-muted);
+    font-size: 14px; font-weight: 500; transition: 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .btn-nav {
+    background: var(--violet) !important; color: white !important;
+    padding: 10px 24px !important; border-radius: 10px !important;
+    font-weight: 600 !important;
+  }
+  .btn-nav:hover { background: var(--violet-dark) !important; }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 160px 24px 100px;
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center;
+  }
+  .hero-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.15; margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .hero-text h1 .accent {
+    background: linear-gradient(135deg, var(--violet), #EC4899);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-text p {
+    font-size: 19px; line-height: 1.7; color: var(--ink-muted);
+    margin-bottom: 36px; max-width: 460px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 15px 32px; border-radius: 12px;
+    font-size: 16px; font-weight: 600; text-decoration: none;
+    transition: all 0.25s; cursor: pointer; border: none;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--violet); color: white; }
+  .btn-primary:hover { background: var(--violet-dark); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.3); }
+  .btn-outline { border: 2px solid rgba(0,0,0,0.1); background: transparent; color: var(--ink); }
+  .btn-outline:hover { border-color: var(--violet); color: var(--violet); }
+
+  /* ── Hero Visual ── */
+  .hero-visual {
+    background: var(--ink);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.15);
+  }
+  .visual-header {
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.06);
+    display: flex; gap: 8px;
+  }
+  .visual-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .visual-body { padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .visual-panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 20px;
+  }
+  .panel-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--violet-light); margin-bottom: 14px; font-weight: 600;
+  }
+  .panel-text {
+    font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.6);
+  }
+  .panel-text .hl {
+    color: var(--violet-light); background: rgba(124,58,237,0.15);
+    padding: 1px 4px; border-radius: 3px;
+  }
+  .panel-quote {
+    border-left: 2px solid var(--violet-light);
+    padding-left: 12px; margin: 10px 0;
+    font-size: 12px; line-height: 1.6;
+    color: rgba(255,255,255,0.5);
+    font-style: italic;
+  }
+  .panel-source {
+    font-size: 10px; color: rgba(255,255,255,0.3);
+    margin-top: 6px;
+  }
+
+  /* ── Value Props ── */
+  .value-section {
+    padding: 100px 24px;
+    max-width: 1000px; margin: 0 auto;
+    text-align: center;
+  }
+  .label {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--violet); margin-bottom: 12px;
+  }
+  .value-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    margin-bottom: 16px; line-height: 1.2;
+  }
+  .value-sub {
+    font-size: 18px; color: var(--ink-muted); max-width: 540px;
+    margin: 0 auto 64px; line-height: 1.6;
+  }
+  .value-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+    text-align: left;
+  }
+  .value-card {
+    padding: 32px; border-radius: 16px; background: var(--violet-bg);
+    border: 1px solid rgba(124,58,237,0.1);
+  }
+  .value-card h3 {
+    font-size: 18px; font-weight: 700; margin: 16px 0 10px;
+  }
+  .value-card p {
+    font-size: 15px; line-height: 1.6; color: var(--ink-muted);
+  }
+  .value-card .emoji {
+    font-size: 28px;
+  }
+
+  /* ── Workflow ── */
+  .workflow {
+    background: var(--gray-bg); padding: 100px 24px;
+  }
+  .workflow-inner {
+    max-width: 800px; margin: 0 auto;
+  }
+  .workflow-step {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+    align-items: center; padding: 48px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .workflow-step:nth-child(even) { direction: rtl; }
+  .workflow-step:nth-child(even) > * { direction: ltr; }
+  .workflow-step:last-child { border: none; }
+  .workflow-step h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px; margin-bottom: 12px;
+  }
+  .workflow-step p { font-size: 16px; line-height: 1.7; color: var(--ink-muted); }
+  .workflow-visual {
+    background: white; border-radius: 16px;
+    padding: 24px; border: 1px solid rgba(0,0,0,0.06);
+    font-size: 14px; line-height: 1.8; color: var(--ink-muted);
+    text-align: center;
+  }
+  .workflow-visual .big { font-size: 36px; margin-bottom: 8px; }
+
+  /* ── Testimonial ── */
+  .testimonial {
+    padding: 80px 24px; text-align: center;
+    background: var(--ink); color: white;
+  }
+  .testimonial blockquote {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(22px, 3vw, 32px);
+    line-height: 1.5; max-width: 700px; margin: 0 auto 24px;
+    font-style: italic; color: rgba(255,255,255,0.9);
+  }
+  .testimonial cite {
+    font-style: normal; font-size: 15px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ── Pricing ── */
+  .pricing { padding: 100px 24px; text-align: center; }
+  .pricing-cards {
+    max-width: 1000px; margin: 48px auto 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .p-card {
+    border: 2px solid rgba(0,0,0,0.06); border-radius: 20px;
+    padding: 36px 28px; text-align: left;
+    transition: 0.3s; position: relative;
+  }
+  .p-card.pop { border-color: var(--violet); box-shadow: 0 8px 32px rgba(124,58,237,0.12); }
+  .p-card.pop::after {
+    content: 'Best Value'; position: absolute; top: -12px; left: 50%;
+    transform: translateX(-50%); background: var(--violet); color: white;
+    padding: 4px 14px; border-radius: 100px; font-size: 11px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .p-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .p-card .amount {
+    font-size: 40px; font-weight: 800; margin-bottom: 4px;
+  }
+  .p-card .amount span { font-size: 16px; font-weight: 400; color: var(--ink-muted); }
+  .p-card .desc { font-size: 14px; color: var(--ink-muted); margin-bottom: 24px; }
+  .p-card ul { list-style: none; margin-bottom: 28px; }
+  .p-card li {
+    padding: 6px 0; font-size: 14px; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .p-card li::before { content: '✓'; color: var(--violet); font-weight: 700; font-size: 14px; }
+  .p-card .btn { width: 100%; justify-content: center; padding: 13px; font-size: 15px; }
+
+  /* ── Final CTA ── */
+  .final-cta {
+    background: linear-gradient(135deg, var(--violet-bg), #FCE7F3);
+    padding: 100px 24px; text-align: center;
+  }
+  .final-cta h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    margin-bottom: 16px;
+  }
+  .final-cta p {
+    font-size: 18px; color: var(--ink-muted);
+    margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto;
+  }
+
+  footer {
+    padding: 40px 24px; text-align: center;
+    font-size: 14px; color: var(--ink-muted);
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; padding-top: 120px; }
+    .visual-body { grid-template-columns: 1fr; }
+    .value-grid { grid-template-columns: 1fr; }
+    .workflow-step { grid-template-columns: 1fr; }
+    .workflow-step:nth-child(even) { direction: ltr; }
+    .pricing-cards { grid-template-columns: 1fr; }
+    .nav-links a:not(.btn-nav) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Research Copilot</div>
+  <div class="nav-links">
+    <a href="#value">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="btn-nav">Get Early Access</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>Write with everything <span class="accent">you've ever read</span></h1>
+    <p>Research Copilot retrieves your own book highlights and notes, then helps you draft essays, articles, and arguments grounded in your personal library.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Start Writing &rarr;</a>
+      <a href="#value" class="btn btn-outline">Learn More</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="visual-header">
+      <div class="visual-dot"></div>
+      <div class="visual-dot"></div>
+      <div class="visual-dot"></div>
+    </div>
+    <div class="visual-body">
+      <div class="visual-panel">
+        <div class="panel-label">Your Highlights</div>
+        <div class="panel-quote">
+          "The best way to learn is to <span class="hl">teach what you know</span> to someone else."
+          <div class="panel-source">Show Your Work — Austin Kleon</div>
+        </div>
+        <div class="panel-quote">
+          "Writing is <span class="hl">thinking on paper</span>. Anyone who thinks clearly can write clearly."
+          <div class="panel-source">On Writing Well — William Zinsser</div>
+        </div>
+        <div class="panel-quote">
+          "The <span class="hl">act of writing</span> is the act of discovering what you believe."
+          <div class="panel-source">Bird by Bird — Anne Lamott</div>
+        </div>
+      </div>
+      <div class="visual-panel">
+        <div class="panel-label">Draft Output</div>
+        <div class="panel-text">
+          <strong style="color:white;">Why Writing Is Thinking</strong><br><br>
+          The relationship between writing and thinking is not sequential — it's <span class="hl">simultaneous</span>. As Lamott observes, writing is the act of discovering belief...<br><br>
+          This aligns with Zinsser's framing of writing as <span class="hl">"thinking on paper"</span> — a process that demands and produces clarity in equal measure...
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Value Props -->
+<section class="value-section" id="value">
+  <div class="label">Why Research Copilot</div>
+  <h2 class="value-title">Your reading becomes your research team</h2>
+  <p class="value-sub">Every highlight you've ever saved becomes a citable source. Every margin note becomes fuel for your next piece.</p>
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="emoji">&#128218;</div>
+      <h3>Grounded in Your Sources</h3>
+      <p>Every generated paragraph links back to your actual highlights. No hallucinations — just synthesis of what you've actually read.</p>
+    </div>
+    <div class="value-card">
+      <div class="emoji">&#9997;</div>
+      <h3>Draft, Don't Replace</h3>
+      <p>We generate outlines and rough drafts. You refine, rearrange, and add your voice. The writing is always yours.</p>
+    </div>
+    <div class="value-card">
+      <div class="emoji">&#128279;</div>
+      <h3>Cite Everything</h3>
+      <p>Every claim traces back to a specific book and highlight. Export with citations formatted for your publishing platform.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Workflow -->
+<section class="workflow">
+  <div class="workflow-inner">
+    <div style="text-align:center; margin-bottom: 64px;">
+      <div class="label">Workflow</div>
+      <h2 class="value-title">From question to first draft in minutes</h2>
+    </div>
+    <div class="workflow-step">
+      <div>
+        <h3>1. Describe your topic</h3>
+        <p>"I want to write about how the best creative work comes from constraints, not freedom."</p>
+      </div>
+      <div class="workflow-visual">
+        <div class="big">&#128172;</div>
+        Natural language topic input
+      </div>
+    </div>
+    <div class="workflow-step">
+      <div>
+        <h3>2. We find your evidence</h3>
+        <p>Semantic search surfaces the most relevant highlights from your entire library — across every book, article, and note you've saved.</p>
+      </div>
+      <div class="workflow-visual">
+        <div class="big">&#128270;</div>
+        AI-powered retrieval from your highlights
+      </div>
+    </div>
+    <div class="workflow-step">
+      <div>
+        <h3>3. Get a grounded draft</h3>
+        <p>A structured outline and first draft, woven from your own sources. Every quote attributed, every idea traceable.</p>
+      </div>
+      <div class="workflow-visual">
+        <div class="big">&#128196;</div>
+        Cited, structured, ready to refine
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonial -->
+<section class="testimonial">
+  <blockquote>"I went from a blank page to a 1,200-word draft in 15 minutes — and every quote was from books I actually trust."</blockquote>
+  <cite>— Beta tester, Substack writer</cite>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="label">Pricing</div>
+  <h2 class="value-title">Tools for every kind of writer</h2>
+  <div class="pricing-cards">
+    <div class="p-card">
+      <h3>Explorer</h3>
+      <div class="amount">$0<span>/mo</span></div>
+      <div class="desc">Search your highlights</div>
+      <ul>
+        <li>500 highlights</li>
+        <li>Semantic search</li>
+        <li>Manual import</li>
+      </ul>
+      <a href="#" class="btn btn-outline">Get Started</a>
+    </div>
+    <div class="p-card pop">
+      <h3>Writer</h3>
+      <div class="amount">$19<span>/mo</span></div>
+      <div class="desc">Search + AI drafting</div>
+      <ul>
+        <li>Unlimited highlights</li>
+        <li>Readwise & Kindle sync</li>
+        <li>AI-powered drafts</li>
+        <li>Citation export</li>
+        <li>10 drafts / month</li>
+      </ul>
+      <a href="#" class="btn btn-primary">Start Free Trial</a>
+    </div>
+    <div class="p-card">
+      <h3>Professional</h3>
+      <div class="amount">$39<span>/mo</span></div>
+      <div class="desc">Unlimited everything</div>
+      <ul>
+        <li>Everything in Writer</li>
+        <li>Unlimited drafts</li>
+        <li>Notion & Obsidian export</li>
+        <li>API access</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#" class="btn btn-outline">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+  <h2>Stop staring at a blank page.<br>Start writing from what you know.</h2>
+  <p>Join writers who draft faster by building on their own reading.</p>
+  <a href="#" class="btn btn-primary">Get Early Access &rarr;</a>
+</section>
+
+<footer>&copy; 2026 Research Copilot. All rights reserved.</footer>
+
+</body>
+</html>

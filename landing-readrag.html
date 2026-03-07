@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadRAG — Open-Source RAG Pipeline for Personal Knowledge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --green: #22C55E;
+    --green-dark: #16A34A;
+    --green-dim: rgba(34,197,94,0.1);
+    --green-border: rgba(34,197,94,0.2);
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface-2: #1C1C1C;
+    --border: #262626;
+    --text: #E5E5E5;
+    --text-muted: #A3A3A3;
+    --text-dim: #525252;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.9); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .nav-logo .gt { color: var(--green); }
+  .nav-right { display: flex; gap: 24px; align-items: center; }
+  .nav-right a {
+    text-decoration: none; color: var(--text-muted);
+    font-size: 14px; font-weight: 500; transition: 0.2s;
+  }
+  .nav-right a:hover { color: var(--text); }
+  .btn-gh {
+    background: var(--white) !important; color: var(--bg) !important;
+    padding: 9px 20px !important; border-radius: 8px !important;
+    font-weight: 700 !important; font-size: 13px !important;
+    display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 140px 24px 80px; text-align: center;
+    max-width: 800px; margin: 0 auto;
+  }
+  .hero-badges {
+    display: flex; gap: 10px; justify-content: center; margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600; padding: 5px 14px;
+    border-radius: 6px; border: 1px solid;
+  }
+  .badge-green { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+  .badge-gray { background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.03em; margin-bottom: 20px;
+  }
+  .hero h1 .green { color: var(--green); }
+  .hero p {
+    font-size: 18px; line-height: 1.7; color: var(--text-muted);
+    max-width: 540px; margin: 0 auto 36px;
+  }
+  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 10px; font-size: 15px;
+    font-weight: 600; text-decoration: none; transition: 0.25s;
+    cursor: pointer; border: none; font-family: inherit;
+  }
+  .btn-green { background: var(--green); color: var(--bg); }
+  .btn-green:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34,197,94,0.2); }
+  .btn-border { border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .btn-border:hover { border-color: var(--text-dim); }
+
+  /* ── Terminal Demo ── */
+  .terminal-section {
+    max-width: 780px; margin: 0 auto; padding: 0 24px 100px;
+  }
+  .terminal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  }
+  .term-bar {
+    background: var(--surface-2); padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .term-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .term-title {
+    flex: 1; text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-dim);
+  }
+  .term-body {
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 2;
+  }
+  .term-line { display: flex; gap: 0; }
+  .term-prompt { color: var(--green); white-space: pre; }
+  .term-cmd { color: var(--text); }
+  .term-output { color: var(--text-dim); }
+  .term-success { color: var(--green); }
+  .term-highlight { color: #60A5FA; }
+  .term-warn { color: #FBBF24; }
+
+  /* ── Architecture ── */
+  .architecture {
+    padding: 100px 24px;
+    max-width: 900px; margin: 0 auto;
+  }
+  .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--green); margin-bottom: 12px;
+  }
+  .heading {
+    font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.15;
+  }
+  .subheading {
+    font-size: 17px; color: var(--text-muted); margin-bottom: 56px;
+    max-width: 500px; line-height: 1.6;
+  }
+  .arch-flow {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    align-items: center;
+  }
+  .arch-node {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 16px; text-align: center;
+  }
+  .arch-node .node-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+  .arch-node .node-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600; color: var(--text);
+  }
+  .arch-node .node-desc { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+  .arch-arrow {
+    text-align: center; color: var(--green); font-size: 20px;
+  }
+
+  /* ── Features ── */
+  .features {
+    background: var(--surface); padding: 100px 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .feat-inner { max-width: 1000px; margin: 0 auto; }
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .feat-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px;
+    transition: 0.3s;
+  }
+  .feat-card:hover { border-color: var(--green-border); }
+  .feat-card .fc-icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    background: var(--green-dim); border: 1px solid var(--green-border);
+    color: var(--green); padding: 4px 10px; border-radius: 6px;
+    display: inline-block; margin-bottom: 16px;
+  }
+  .feat-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .feat-card p { font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+
+  /* ── Stats ── */
+  .stats-bar {
+    padding: 60px 24px; text-align: center;
+  }
+  .stats-inner {
+    max-width: 800px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  }
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px; font-weight: 800; color: var(--green);
+  }
+  .stat-lbl { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Comparison ── */
+  .comparison {
+    padding: 100px 24px; max-width: 800px; margin: 0 auto;
+  }
+  .comp-table {
+    width: 100%; border-collapse: collapse; margin-top: 48px;
+    font-size: 14px;
+  }
+  .comp-table th {
+    text-align: left; padding: 12px 16px;
+    font-size: 13px; font-weight: 700;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-muted);
+  }
+  .comp-table th:last-child { color: var(--green); }
+  .comp-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .comp-table tr:hover td { background: var(--surface); }
+  .comp-table td:first-child { color: var(--text); font-weight: 500; }
+  .comp-check { color: var(--green); font-weight: 700; }
+  .comp-x { color: var(--text-dim); }
+
+  /* ── Pricing ── */
+  .pricing {
+    background: var(--surface); padding: 100px 24px;
+    border-top: 1px solid var(--border); text-align: center;
+  }
+  .price-cards {
+    max-width: 800px; margin: 48px auto 0;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    text-align: left;
+  }
+  .pc {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 14px; padding: 32px;
+  }
+  .pc.pop { border-color: var(--green); }
+  .pc h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .pc .price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px; font-weight: 800; margin-bottom: 4px;
+  }
+  .pc .price span { font-size: 14px; color: var(--text-dim); font-weight: 400; }
+  .pc .tagline { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+  .pc ul { list-style: none; margin-bottom: 28px; }
+  .pc li { font-size: 14px; color: var(--text-muted); padding: 5px 0; display: flex; gap: 8px; }
+  .pc li::before { content: '✓'; color: var(--green); font-weight: 700; }
+  .pc .btn { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
+
+  /* ── CTA ── */
+  .final-cta {
+    padding: 100px 24px; text-align: center;
+  }
+  .final-cta h2 {
+    font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 16px;
+  }
+  .final-cta p {
+    font-size: 17px; color: var(--text-muted);
+    margin-bottom: 36px; max-width: 440px; margin-left: auto; margin-right: auto;
+  }
+  .install-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 24px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    color: var(--green); display: inline-block; margin-top: 20px;
+  }
+
+  footer {
+    padding: 40px 24px; text-align: center;
+    font-size: 13px; color: var(--text-dim);
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--green); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .arch-flow { grid-template-columns: 1fr; gap: 8px; }
+    .arch-arrow { transform: rotate(90deg); }
+    .feat-grid { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .comp-table { font-size: 12px; }
+    .price-cards { grid-template-columns: 1fr; }
+    .nav-right a:not(.btn-gh) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span class="gt">&gt;</span> ReadRAG</div>
+  <div class="nav-right">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="btn-gh">&#9733; Star on GitHub</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badges">
+    <span class="badge badge-green">Open Source</span>
+    <span class="badge badge-gray">MIT License</span>
+    <span class="badge badge-gray">Python 3.10+</span>
+  </div>
+  <h1>Turn your reading into a<br><span class="green">searchable API</span></h1>
+  <p>An open-source RAG pipeline that indexes your book highlights, notes, and clippings into a vector database — ready for semantic search or AI-powered retrieval.</p>
+  <div class="hero-btns">
+    <a href="#" class="btn btn-green">Get Started &rarr;</a>
+    <a href="#" class="btn btn-border">View Documentation</a>
+  </div>
+</section>
+
+<!-- Terminal -->
+<section class="terminal-section">
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="term-dot"></div>
+      <div class="term-dot"></div>
+      <div class="term-dot"></div>
+      <div class="term-title">Terminal</div>
+    </div>
+    <div class="term-body">
+      <div class="term-line"><span class="term-prompt">$ </span><span class="term-cmd">pip install readrag</span></div>
+      <div class="term-output">Successfully installed readrag-1.0.0</div>
+      <br>
+      <div class="term-line"><span class="term-prompt">$ </span><span class="term-cmd">readrag init --source readwise</span></div>
+      <div class="term-output">&#128270; Connecting to Readwise API...</div>
+      <div class="term-output"><span class="term-highlight">&#128218; Found 257 books, 21,925 highlights</span></div>
+      <br>
+      <div class="term-line"><span class="term-prompt">$ </span><span class="term-cmd">readrag index</span></div>
+      <div class="term-output">&#9654; Embedding highlights with voyage-4-large...</div>
+      <div class="term-output">&#9654; Indexing into Qdrant... <span class="term-warn">[################] 100%</span></div>
+      <div class="term-success">&#10003; 21,925 highlights indexed in 47s</div>
+      <br>
+      <div class="term-line"><span class="term-prompt">$ </span><span class="term-cmd">readrag search "what makes great writing"</span></div>
+      <div class="term-output"><span class="term-highlight">[0.96]</span> On Writing Well — "Clear thinking becomes clear writing..."</div>
+      <div class="term-output"><span class="term-highlight">[0.93]</span> Bird by Bird — "Almost all good writing begins with terrible..."</div>
+      <div class="term-output"><span class="term-highlight">[0.91]</span> Several Short Sentences — "The way most people learn to write..."</div>
+    </div>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section class="architecture">
+  <div class="label">Architecture</div>
+  <h2 class="heading">Simple pipeline, powerful results</h2>
+  <p class="subheading">Seven focused scripts. One clean pipeline. From raw highlights to semantic search in minutes.</p>
+  <div class="arch-flow">
+    <div class="arch-node">
+      <span class="node-icon">&#128218;</span>
+      <div class="node-name">Source</div>
+      <div class="node-desc">Readwise / Kindle / CSV</div>
+    </div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">
+      <span class="node-icon">&#9986;</span>
+      <div class="node-name">Split & Clean</div>
+      <div class="node-desc">Chunk + metadata</div>
+    </div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">
+      <span class="node-icon">&#128270;</span>
+      <div class="node-name">Embed & Index</div>
+      <div class="node-desc">Voyage AI + Qdrant</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="feat-inner">
+    <div class="label">Features</div>
+    <h2 class="heading">Everything you need. Nothing you don't.</h2>
+    <p class="subheading" style="margin-bottom:48px;">Built by a reader, for readers who code.</p>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="fc-icon">CLI</div>
+        <h3>CLI-First Interface</h3>
+        <p>init, index, search, update — clean commands that do one thing well. Pipe-friendly output.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon">API</div>
+        <h3>Python API</h3>
+        <p>Import readrag in your own scripts. Build custom search UIs, Slack bots, or AI agents on top.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon">&#9881;</div>
+        <h3>Configurable Pipeline</h3>
+        <p>Swap embedding models, vector DBs, and data sources. YAML config, no code changes needed.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon">&#128270;</div>
+        <h3>Metadata Filtering</h3>
+        <p>Filter by author, genre, tags, favorites. Combine semantic search with structured queries.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon">&#8635;</div>
+        <h3>Incremental Updates</h3>
+        <p>Only re-index what's changed. Efficient syncing for growing libraries.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon">&#10003;</div>
+        <h3>Battle-Tested</h3>
+        <p>18/18 acceptance tests passing. Zero indexing errors across 21,925 highlights. Production-grade.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="stats-bar">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-val">7</div>
+      <div class="stat-lbl">Focused scripts</div>
+    </div>
+    <div>
+      <div class="stat-val">21.9K</div>
+      <div class="stat-lbl">Highlights tested</div>
+    </div>
+    <div>
+      <div class="stat-val">18/18</div>
+      <div class="stat-lbl">Tests passing</div>
+    </div>
+    <div>
+      <div class="stat-val">0</div>
+      <div class="stat-lbl">Index errors</div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison -->
+<section class="comparison">
+  <div class="label">Why ReadRAG</div>
+  <h2 class="heading">Built for personal knowledge, not enterprise docs</h2>
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>LangChain</th>
+        <th>LlamaIndex</th>
+        <th>ReadRAG</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Highlight-native</td>
+        <td class="comp-x">&#10005;</td>
+        <td class="comp-x">&#10005;</td>
+        <td class="comp-check">&#10003;</td>
+      </tr>
+      <tr>
+        <td>Readwise integration</td>
+        <td class="comp-x">&#10005;</td>
+        <td class="comp-x">&#10005;</td>
+        <td class="comp-check">&#10003;</td>
+      </tr>
+      <tr>
+        <td>Book metadata</td>
+        <td class="comp-x">Manual</td>
+        <td class="comp-x">Manual</td>
+        <td class="comp-check">&#10003; Built-in</td>
+      </tr>
+      <tr>
+        <td>Setup time</td>
+        <td>Hours</td>
+        <td>Hours</td>
+        <td class="comp-check">Minutes</td>
+      </tr>
+      <tr>
+        <td>Dependencies</td>
+        <td>Heavy</td>
+        <td>Heavy</td>
+        <td class="comp-check">Minimal</td>
+      </tr>
+      <tr>
+        <td>Lines of code to search</td>
+        <td>50-100+</td>
+        <td>30-50+</td>
+        <td class="comp-check">1 command</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="label">Pricing</div>
+  <h2 class="heading">Open source. Hosted option available.</h2>
+  <div class="price-cards">
+    <div class="pc">
+      <h3>Self-Hosted</h3>
+      <div class="price">Free</div>
+      <div class="tagline">Forever. MIT License.</div>
+      <ul>
+        <li>Full source code</li>
+        <li>All features</li>
+        <li>Your own infra</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="btn btn-border">Clone from GitHub</a>
+    </div>
+    <div class="pc pop">
+      <h3>ReadRAG Cloud</h3>
+      <div class="price">$12<span>/mo</span></div>
+      <div class="tagline">Managed Qdrant + embeddings</div>
+      <ul>
+        <li>Everything self-hosted has</li>
+        <li>No Docker/Qdrant setup</li>
+        <li>Managed embedding API</li>
+        <li>Web dashboard</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#" class="btn btn-green">Start Free Trial</a>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+  <h2>Your highlights deserve<br>better than Cmd+F</h2>
+  <p>Get ReadRAG running in under 5 minutes. Open source, battle-tested, built for readers.</p>
+  <a href="#" class="btn btn-green">Read the Docs &rarr;</a>
+  <div class="install-block">pip install readrag</div>
+</section>
+
+<footer>
+  <p>&copy; 2026 ReadRAG &middot; <a href="#">GitHub</a> &middot; <a href="#">Docs</a> &middot; MIT License</p>
+</footer>
+
+</body>
+</html>
